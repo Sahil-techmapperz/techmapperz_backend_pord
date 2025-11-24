@@ -25,7 +25,14 @@ jobs:
         cache: 'npm'
         
     - name: Install dependencies
-      run: npm ci
+      run: |
+        if [ -f "package-lock.json" ]; then
+          npm ci
+        else
+          echo "⚠️ package-lock.json not found, generating it..."
+          npm install --package-lock-only
+          npm ci
+        fi
       
     - name: Upload files to VPS
       uses: appleboy/scp-action@v0.1.7
@@ -34,7 +41,7 @@ jobs:
         username: ${{ secrets.VPS_USERNAME }}
         password: ${{ secrets.VPS_PASSWORD }}
         port: ${{ secrets.VPS_PORT }}
-        source: "src,package.json,package-lock.json"
+        source: "src,package.json,package-lock.json,ecosystem.config.js"
         target: "/root/techmapperz-backend-prod/"
         overwrite: true
       
@@ -48,19 +55,10 @@ jobs:
         script: |
           cd /root
           
-          # Check if project directory exists, if not clone it
+          # Ensure project directory exists (files are synced via SCP)
           if [ ! -d "techmapperz-backend-prod" ]; then
-            echo "Project directory not found. Cloning repository..."
-            git clone https://github.com/Sahil-techmapperz/TechmapperzBackend_New.git techmapperz-backend-prod
-          else
-            echo "Project directory exists. Pulling latest changes..."
-            cd techmapperz-backend-prod
-            git pull origin main || {
-              echo "Git pull failed. Re-cloning repository..."
-              cd /root
-              rm -rf techmapperz-backend-prod
-              git clone https://github.com/Sahil-techmapperz/TechmapperzBackend_New.git techmapperz-backend-prod
-            }
+            echo "Project directory not found. Creating directory..."
+            mkdir -p techmapperz-backend-prod
           fi
           
           # Navigate to project directory
@@ -84,7 +82,7 @@ jobs:
           
           # Export environment variables
           export NODE_ENV=production
-          export PORT=${{ secrets.BACKEND_PORT || '3001' }}
+          export PORT=${{ secrets.BACKEND_PORT || '8000' }}
           
           # Install production dependencies
           echo "📥 Installing dependencies..."
