@@ -1,0 +1,106 @@
+name: Deploy Backend to Hostinger VPS
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Upload files to VPS
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        password: ${{ secrets.VPS_PASSWORD }}
+        port: ${{ secrets.VPS_PORT }}
+        source: "src,package.json,package-lock.json"
+        target: "/root/techmapperz-backend-prod/"
+        overwrite: true
+      
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        password: ${{ secrets.VPS_PASSWORD }}
+        port: ${{ secrets.VPS_PORT }}
+        script: |
+          cd /root
+          
+          # Check if project directory exists, if not clone it
+          if [ ! -d "techmapperz-backend-prod" ]; then
+            echo "Project directory not found. Cloning repository..."
+            git clone https://github.com/Sahil-techmapperz/TechmapperzBackend_New.git techmapperz-backend-prod
+          else
+            echo "Project directory exists. Pulling latest changes..."
+            cd techmapperz-backend-prod
+            git pull origin main || {
+              echo "Git pull failed. Re-cloning repository..."
+              cd /root
+              rm -rf techmapperz-backend-prod
+              git clone https://github.com/Sahil-techmapperz/TechmapperzBackend_New.git techmapperz-backend-prod
+            }
+          fi
+          
+          # Navigate to project directory
+          cd /root/techmapperz-backend-prod
+          
+          # Create .env file with environment variables
+          cat > .env << EOF
+          MONGO_URL=${{ secrets.MONGO_URL }}
+          PORT=${{ secrets.BACKEND_PORT || '8000' }}
+          NODE_ENV=production
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          EMAIL_USER=${{ secrets.EMAIL_USER }}
+          EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+          IMAGEKIT_PUBLIC_KEY=${{ secrets.IMAGEKIT_PUBLIC_KEY }}
+          IMAGEKIT_PRIVATE_KEY=${{ secrets.IMAGEKIT_PRIVATE_KEY }}
+          IMAGEKIT_URL_ENDPOINT=${{ secrets.IMAGEKIT_URL_ENDPOINT }}
+          EOF
+          
+          # Note: Optional variables (EMAIL_USER, EMAIL_PASS, etc.) will be empty if not set
+          # This is fine as they are not currently used in the codebase
+          
+          # Export environment variables
+          export NODE_ENV=production
+          export PORT=${{ secrets.BACKEND_PORT || '3001' }}
+          
+          # Install production dependencies
+          echo "📥 Installing dependencies..."
+          npm ci --production --silent
+          
+          echo "✅ Dependencies installed successfully"
+          
+          # Stop existing PM2 process and start new one
+          echo "🔄 Restarting backend application..."
+          pm2 stop techmapperz-backend 2>/dev/null || echo "No existing process to stop"
+          pm2 delete techmapperz-backend 2>/dev/null || echo "No existing process to delete"
+          
+          # Start the backend with PM2 using ecosystem config
+          pm2 start ecosystem.config.js --env production
+          pm2 save
+          
+          echo "✅ Deployment completed successfully!"
+          pm2 status techmapperz-backend
+

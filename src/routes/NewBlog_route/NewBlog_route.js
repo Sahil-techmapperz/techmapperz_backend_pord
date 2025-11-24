@@ -87,13 +87,22 @@ router.get('/related/:id', async (req, res) => {
 // Get all blog posts
 router.get('/:page?', async (req, res) => {
   try {
-    const perPage = req.query.perPage ? parseInt(req.query.perPage) : 3; // Define the number of blog posts per page
-    const page = req.params.page || 1; // Current page number
+    const perPage = req.query.perPage ? parseInt(req.query.perPage) : 6; // Define the number of blog posts per page
+    const page = req.params.page ? parseInt(req.params.page) : 1; // Current page number - ensure it's a number
+    
+    // Validate page number
+    if (isNaN(page) || page < 1) {
+      return res.status(400).json({ error: 'Invalid page number' });
+    }
+
+    // Calculate skip value for pagination
+    const skip = (page - 1) * perPage;
 
     const blogPosts = await BlogPost.find()
       .populate('author')
       .populate('comments')
-      .skip((perPage * page) - perPage)
+      .sort({ created_at: -1 }) // Sort by newest first
+      .skip(skip)
       .limit(perPage);
 
     const totalBlogPosts = await BlogPost.countDocuments(); // Total number of blog posts

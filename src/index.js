@@ -18,7 +18,7 @@ const Author = require("./routes/Author_route/Author_route");
 
 require('dotenv').config();
 const app = expres();
-const port = process.env.PORT
+const port = process.env.PORT || 8000
 app.use(cors())
 app.use(expres.json())
 app.use(bodyParser.json({ limit: '50mb' }));
