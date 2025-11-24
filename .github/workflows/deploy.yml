@@ -72,9 +72,9 @@ jobs:
           JWT_SECRET=${{ secrets.JWT_SECRET }}
           EMAIL_USER=${{ secrets.EMAIL_USER }}
           EMAIL_PASS=${{ secrets.EMAIL_PASS }}
-          IMAGEKIT_PUBLIC_KEY=${{ secrets.IMAGEKIT_PUBLIC_KEY }}
-          IMAGEKIT_PRIVATE_KEY=${{ secrets.IMAGEKIT_PRIVATE_KEY }}
-          IMAGEKIT_URL_ENDPOINT=${{ secrets.IMAGEKIT_URL_ENDPOINT }}
+          ImagekitpublicKey=${{ secrets.IMAGEKIT_PUBLIC_KEY }}
+          ImagekitprivateKey=${{ secrets.IMAGEKIT_PRIVATE_KEY }}
+          ImagekiturlEndpoint=${{ secrets.IMAGEKIT_URL_ENDPOINT }}
           EOF
           
           # Note: Optional variables (EMAIL_USER, EMAIL_PASS, etc.) will be empty if not set

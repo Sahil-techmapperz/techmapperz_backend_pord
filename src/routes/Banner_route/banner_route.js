@@ -7,18 +7,24 @@ const multer = require('multer');
 const upload = multer();
 const ImageKit = require('imagekit');
 
-
-
-const imagekit = new ImageKit({
-  publicKey:process.env.ImagekitpublicKey,
-  privateKey: process.env.ImagekitprivateKey,
-  urlEndpoint: `https://ik.imagekit.io/${process.env.ImagekiturlEndpoint}`,
-});
+// Initialize ImageKit only if credentials are provided
+let imagekit = null;
+if (process.env.ImagekitpublicKey && process.env.ImagekitprivateKey && process.env.ImagekiturlEndpoint) {
+  imagekit = new ImageKit({
+    publicKey: process.env.ImagekitpublicKey,
+    privateKey: process.env.ImagekitprivateKey,
+    urlEndpoint: `https://ik.imagekit.io/${process.env.ImagekiturlEndpoint}`,
+  });
+}
 
 
 
 const uploadFile = async (fileBuffer, fileName) => {
   try {
+    if (!imagekit) {
+      console.warn('ImageKit not configured. File upload skipped.');
+      return null;
+    }
     const response = await imagekit.upload({
       file: fileBuffer,
       fileName: fileName,
