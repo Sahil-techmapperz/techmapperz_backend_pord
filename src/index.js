@@ -45,8 +45,28 @@ app.get('/',async(req,res)=>{
 
 
 
-app.listen(port,async()=>{
-    await connect();
-    console.log("Connect")
-    console.log(`listening on http://localhost:${port}`)
-})
+app.listen(port, async () => {
+    try {
+        await connect();
+        console.log("✅ Database connected successfully");
+        console.log(`✅ Server listening on http://localhost:${port}`);
+    } catch (error) {
+        console.error("❌ Error starting server:", error);
+        if (error.code === 'EADDRINUSE') {
+            console.error(`❌ Port ${port} is already in use. Please free the port or change the PORT environment variable.`);
+            process.exit(1);
+        } else {
+            console.error("❌ Database connection failed:", error);
+            process.exit(1);
+        }
+    }
+}).on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+        console.error(`❌ Port ${port} is already in use. Please free the port or change the PORT environment variable.`);
+        console.error(`💡 To find what's using the port, run: lsof -i:${port}`);
+        process.exit(1);
+    } else {
+        console.error("❌ Server error:", error);
+        process.exit(1);
+    }
+});
