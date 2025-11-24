@@ -95,6 +95,13 @@ jobs:
           pm2 stop techmapperz-backend 2>/dev/null || echo "No existing process to stop"
           pm2 delete techmapperz-backend 2>/dev/null || echo "No existing process to delete"
           
+          # Kill any process using port 8000 (if any)
+          echo "🔍 Checking for processes on port 8000..."
+          lsof -ti:8000 | xargs kill -9 2>/dev/null || echo "No process found on port 8000"
+          
+          # Wait a moment for port to be released
+          sleep 2
+          
           # Start the backend with PM2 using ecosystem config
           pm2 start ecosystem.config.js --env production
           pm2 save
