@@ -54,7 +54,7 @@ Add these secrets:
 
 **Backend Environment:**
 - `MONGO_URL` - MongoDB connection string
-- `BACKEND_PORT` - Backend port (default: `8000`)
+- `BACKEND_PORT` - Backend port (default: `8080`)
 - `JWT_SECRET` - JWT secret key
 - `EMAIL_USER` - Email for nodemailer
 - `EMAIL_PASS` - Email password
@@ -80,7 +80,7 @@ pm2 logs techmapperz-backend
 
 Test API:
 ```bash
-curl http://your-vps-ip:8000/
+curl http://your-vps-ip:8080/
 ```
 
 ## 🔄 How It Works
@@ -122,7 +122,7 @@ curl http://your-vps-ip:8000/
 | Build Step | ✅ Yes (Next.js build) | ❌ No (Node.js app) |
 | Upload Files | `.next`, `package.json` | `src`, `package.json` |
 | PM2 Process | `techmapperz` | `techmapperz-backend` |
-| Port | 3000 | 8000 |
+| Port | 3000 | 8080 |
 | Directory | `/root/techmapperz-pord/` | `/root/techmapperz-backend-prod/` |
 
 ## 🛠️ Maintenance

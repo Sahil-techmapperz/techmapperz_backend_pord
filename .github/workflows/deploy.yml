@@ -67,7 +67,7 @@ jobs:
           # Create .env file with environment variables
           cat > .env << EOF
           MONGO_URL=${{ secrets.MONGO_URL }}
-          PORT=${{ secrets.BACKEND_PORT || '8000' }}
+          PORT=${{ secrets.BACKEND_PORT || '8080' }}
           NODE_ENV=production
           JWT_SECRET=${{ secrets.JWT_SECRET }}
           EMAIL_USER=${{ secrets.EMAIL_USER }}
@@ -82,7 +82,7 @@ jobs:
           
           # Export environment variables
           export NODE_ENV=production
-          export PORT=${{ secrets.BACKEND_PORT || '8000' }}
+          export PORT=${{ secrets.BACKEND_PORT || '8080' }}
           
           # Install production dependencies
           echo "📥 Installing dependencies..."
@@ -95,37 +95,37 @@ jobs:
           pm2 stop techmapperz-backend 2>/dev/null || echo "No existing process to stop"
           pm2 delete techmapperz-backend 2>/dev/null || echo "No existing process to delete"
           
-          # Kill any process using port 8000 (multiple methods for reliability)
-          echo "🔍 Checking for processes on port 8000..."
+          # Kill any process using port 8080 (multiple methods for reliability)
+          echo "🔍 Checking for processes on port 8080..."
           # Get process info before killing
-          PORT_PROCESS=$(lsof -ti:8000 2>/dev/null || echo "")
+          PORT_PROCESS=$(lsof -ti:8080 2>/dev/null || echo "")
           if [ -n "$PORT_PROCESS" ]; then
-            echo "⚠️ Found process(es) using port 8000: $PORT_PROCESS"
+            echo "⚠️ Found process(es) using port 8080: $PORT_PROCESS"
             # Check if it's our own process (techmapperz-backend) - if so, it's already stopped
-            # Kill all processes on port 8000
-            lsof -ti:8000 | xargs kill -9 2>/dev/null || true
-            fuser -k 8000/tcp 2>/dev/null || true
+            # Kill all processes on port 8080
+            lsof -ti:8080 | xargs kill -9 2>/dev/null || true
+            fuser -k 8080/tcp 2>/dev/null || true
           else
-            echo "✅ Port 8000 is free"
+            echo "✅ Port 8080 is free"
           fi
           
           # Wait a moment for port to be released
           sleep 5
           
           # Verify port is free before starting
-          if lsof -i:8000 >/dev/null 2>&1; then
-            echo "⚠️ Warning: Port 8000 is still in use after cleanup. Listing processes..."
-            lsof -i:8000 || true
+          if lsof -i:8080 >/dev/null 2>&1; then
+            echo "⚠️ Warning: Port 8080 is still in use after cleanup. Listing processes..."
+            lsof -i:8080 || true
             echo "⚠️ Attempting aggressive cleanup..."
-            lsof -ti:8000 | xargs kill -9 2>/dev/null || true
-            fuser -k 8000/tcp 2>/dev/null || true
+            lsof -ti:8080 | xargs kill -9 2>/dev/null || true
+            fuser -k 8080/tcp 2>/dev/null || true
             sleep 3
           fi
           
           # Final check
-          if lsof -i:8000 >/dev/null 2>&1; then
-            echo "❌ ERROR: Port 8000 is still in use. Cannot start backend."
-            echo "Please manually free port 8000 or change BACKEND_PORT in GitHub secrets."
+          if lsof -i:8080 >/dev/null 2>&1; then
+            echo "❌ ERROR: Port 8080 is still in use. Cannot start backend."
+            echo "Please manually free port 8080 or change BACKEND_PORT in GitHub secrets."
             exit 1
           fi
           

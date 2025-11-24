@@ -41,7 +41,7 @@ Add the following secrets:
 
 ### Backend Configuration
 - **MONGO_URL**: MongoDB connection string (e.g., `mongodb://user:pass@host:27017/dbname`)
-- **BACKEND_PORT**: Backend port (default: `8000`)
+- **BACKEND_PORT**: Backend port (default: `8080`)
 - **JWT_SECRET**: Secret key for JWT tokens
 - **EMAIL_USER**: Email address for nodemailer
 - **EMAIL_PASS**: Email password for nodemailer
@@ -75,7 +75,7 @@ Add the following secrets:
 Test that the backend is running:
 
 ```bash
-curl http://your-vps-ip:8000/
+curl http://your-vps-ip:8080/
 # Should return: "welcome to home page"
 ```
 
@@ -84,7 +84,7 @@ curl http://your-vps-ip:8000/
 If your VPS has a firewall, allow the backend port:
 
 ```bash
-sudo ufw allow 8000/tcp
+sudo ufw allow 8080/tcp
 sudo ufw reload
 ```
 
@@ -97,8 +97,8 @@ npm install -g pm2
 
 ### Port already in use
 ```bash
-# Find process using port 8000
-sudo lsof -i :8000
+# Find process using port 8080
+sudo lsof -i :8080
 # Kill the process or change BACKEND_PORT in secrets
 ```
 

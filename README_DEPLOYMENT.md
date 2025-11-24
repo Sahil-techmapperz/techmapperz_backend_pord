@@ -35,7 +35,7 @@ GitHub Push → GitHub Actions → Install Dependencies → Deploy to VPS → Re
 | **OS** | Ubuntu Linux |
 | **Runtime** | Node.js 18 |
 | **Process Manager** | PM2 |
-| **Port** | 8000 (configurable) |
+| **Port** | 8080 (configurable) |
 | **Directory** | `/root/techmapperz-backend-prod/` |
 
 ## 🔐 Required GitHub Secrets
@@ -52,7 +52,7 @@ Configure these secrets in your GitHub repository settings (Settings → Secrets
 
 **Required:**
 - `MONGO_URL` - MongoDB connection string
-- `BACKEND_PORT` - Backend server port (default: 8000)
+- `BACKEND_PORT` - Backend server port (default: 8080)
 
 **Optional (only if you plan to use email functionality):**
 - `JWT_SECRET` - JWT secret key for authentication (if using JWT)
@@ -116,7 +116,7 @@ pm2 stop techmapperz-backend
 ## 🔍 Health Check
 
 The backend should be accessible at:
-- `http://your-vps-ip:8000/` - Should return "welcome to home page"
+- `http://your-vps-ip:8080/` - Should return "welcome to home page"
 
 ## 🛠️ Troubleshooting
 
@@ -130,7 +130,7 @@ The backend should be accessible at:
 1. Check PM2 logs: `pm2 logs techmapperz-backend`
 2. Verify `.env` file exists and has correct values
 3. Check MongoDB connection: Ensure `MONGO_URL` is correct
-4. Verify port is not in use: `netstat -tulpn | grep 8000`
+4. Verify port is not in use: `netstat -tulpn | grep 8080`
 
 ### Dependencies Issues
 ```bash
@@ -146,7 +146,7 @@ The `.env` file is automatically created during deployment with the following va
 ```env
 # Required
 MONGO_URL=your_mongodb_connection_string
-PORT=8000
+PORT=8080
 NODE_ENV=production
 
 # Optional - only add if you need these features
