@@ -1,4 +1,4 @@
-name: Deploy Backend to Hostinger VPS
+name: Deploy Backend to AWS Lightsail
 
 on:
   push:
@@ -34,18 +34,7 @@ jobs:
           npm ci
         fi
       
-    - name: Upload files to VPS
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USERNAME }}
-        key: ${{ secrets.VPS_PRIVATE_KEY }}
-        port: ${{ secrets.VPS_PORT }}
-        source: "src,package.json,package-lock.json,ecosystem.config.js"
-        target: "/root/techmapperz-backend-prod/"
-        overwrite: true
-      
-    - name: Deploy to VPS
+    - name: Prepare Directory on AWS Lightsail
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.VPS_HOST }}
@@ -53,16 +42,30 @@ jobs:
         key: ${{ secrets.VPS_PRIVATE_KEY }}
         port: ${{ secrets.VPS_PORT }}
         script: |
-          cd /root
-          
-          # Ensure project directory exists (files are synced via SCP)
-          if [ ! -d "techmapperz-backend-prod" ]; then
-            echo "Project directory not found. Creating directory..."
-            mkdir -p techmapperz-backend-prod
-          fi
-          
+          sudo mkdir -p /var/www/techmapperz-backend-prod
+          sudo chown -R $USER:$USER /var/www/techmapperz-backend-prod
+
+    - name: Upload files to AWS Lightsail
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.VPS_PRIVATE_KEY }}
+        port: ${{ secrets.VPS_PORT }}
+        source: "src,package.json,package-lock.json,ecosystem.config.js"
+        target: "/var/www/techmapperz-backend-prod/"
+        overwrite: true
+      
+    - name: Deploy to AWS Lightsail
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.VPS_PRIVATE_KEY }}
+        port: ${{ secrets.VPS_PORT }}
+        script: |
           # Navigate to project directory
-          cd /root/techmapperz-backend-prod
+          cd /var/www/techmapperz-backend-prod
           
           # Create .env file with environment variables
           cat > .env << EOF
